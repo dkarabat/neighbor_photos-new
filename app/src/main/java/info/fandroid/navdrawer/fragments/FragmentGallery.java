@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -52,7 +53,7 @@ public class FragmentGallery extends Fragment {
 
     protected static String AccessToken = "398315918.19f142f.1a6004bc7ce04dc1bc0a7914095a30cb";
     protected static String ClientId = "19f142f8b92641e7b528497c9d206379";
-    protected ArrayList<String> imagesList = new ArrayList<>();
+    protected ArrayList<ImageModel> imagesList = new ArrayList<>();
 
     protected Double latitude;
     protected Double longitude;
@@ -70,7 +71,7 @@ public class FragmentGallery extends Fragment {
 
     protected GPSTracker gps;
 
-    final ProgressBar spinner = (ProgressBar) imageLayout.findViewById(R.id.loading);
+    private static ProgressBar spinner;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -153,7 +154,7 @@ public class FragmentGallery extends Fragment {
 //
         mAdapter = new GalleryAdapter(rootView.getContext(), data);
         recyclerView.setAdapter(mAdapter);
-
+        spinner = (ProgressBar) rootView.findViewById(R.id.loading);
 
         new AsyncHttpTask().execute();
 
@@ -214,8 +215,13 @@ public class FragmentGallery extends Fragment {
     //Downloading data asynchronously
     public class AsyncHttpTask extends AsyncTask<String, Void, Integer> {
 
+        protected void onPreExecute (){
+            spinner.setVisibility(View.VISIBLE);
+        }
+
         @Override
         protected Integer doInBackground(String... params) {
+
             Integer result = 0;
             try {
                 instagram = new Instagram(AccessToken, RestAdapter.LogLevel.BASIC);
@@ -243,20 +249,19 @@ public class FragmentGallery extends Fragment {
 
             if (result == 1) {
                 int counter = 0;
-                for (String url : imagesList) {
+                for (ImageModel model : imagesList) {
                     ImageModel imageModel = new ImageModel();
-                    imageModel.setName("Image " + counter);
-                    imageModel.setUrl(url);
+                    imageModel.setName("Image " + model.getName());
+                    imageModel.setUrl(model.getUrl());
                     data.add(imageModel);
                     counter++;
                 }
                 mAdapter.setImageData(data);
             } else {
-//				Toast.makeText(GridViewActivity.this, "Failed1 to fetch data!", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getActivity(), "Failed1 to fetch data!", Toast.LENGTH_SHORT).show();
             }
-
             //Hide progressbar
-//			mProgressBar.setVisibility(View.GONE);
+		spinner.setVisibility(View.GONE);
         }
     }
 
@@ -269,7 +274,10 @@ public class FragmentGallery extends Fragment {
         if (popular.getMediaList() != null) {
             for (Media media : popular.getMediaList()) {
                 Log.i("link:", media.getImages().getLowResolution().getUrl());
-                imagesList.add(media.getImages().getStandardResolution().getUrl());
+                ImageModel model = new ImageModel();
+                model.setUrl(media.getImages().getStandardResolution().getUrl());
+                model.setName(media.getUser().getFullName());
+                imagesList.add(model);
             }
         }
     }
@@ -283,10 +291,11 @@ public class FragmentGallery extends Fragment {
         if (popular.getResponse().getItems() != null) {
             for (Items media : popular.getResponse().getItems()) {
                 Log.i("link:", media.getPhoto_130());
-                imagesList.add(media.getPhoto_604());
+                ImageModel model = new ImageModel();
+                model.setUrl(media.getPhoto_604());
+                model.setName("vk.com/id" + media.getOwner_id());
+                imagesList.add(model);
             }
         }
     }
-
-
 }
