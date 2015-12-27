@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import info.fandroid.navdrawer.DetailActivity;
 import info.fandroid.navdrawer.GalleryAdapter;
@@ -184,12 +185,13 @@ public class FragmentGallery extends Fragment {
             Integer result = 0;
             try {
                 instagram = new Instagram(AccessToken, RestAdapter.LogLevel.BASIC);
-                long min = (System.currentTimeMillis()/ 1000L) - 1000000000;
-                long max = System.currentTimeMillis() / 1000L;
-                final SearchMediaResponse response = instagram.getMediaEndpoint().search(5000 ,longitude, latitude);
-
+                long startTime = System.currentTimeMillis() / 1000L;
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.WEEK_OF_YEAR, -7);
+                long endTime = calendar.getTimeInMillis() / 1000L;
+                final SearchMediaResponse response = instagram.getMediaEndpoint().search(5000, longitude, latitude, endTime, startTime);
                 VK vk = new VK(RestAdapter.LogLevel.FULL);
-                VkResponse resp = vk.getUsersEndpoint().search(latitude, longitude, 1000, 5000, 5.37);
+                VkResponse resp = vk.getUsersEndpoint().search(latitude, longitude, 1000, 5000, startTime, endTime, 5.40);
                 parseResultVk(resp);
                 parseResult(response);
                 result = 1; // Successful
