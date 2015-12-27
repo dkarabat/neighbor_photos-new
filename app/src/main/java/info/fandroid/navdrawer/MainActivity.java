@@ -1,5 +1,6 @@
 package info.fandroid.navdrawer;
 
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -10,30 +11,42 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import info.fandroid.navdrawer.fragments.FragmentGallery;
-import info.fandroid.navdrawer.fragments.FragmentImport;
+import info.fandroid.navdrawer.fragments.FragmentMap;
 import info.fandroid.navdrawer.fragments.FragmentSend;
 import info.fandroid.navdrawer.fragments.FragmentShare;
 import info.fandroid.navdrawer.fragments.FragmentSlideshow;
 import info.fandroid.navdrawer.fragments.FragmentTools;
+import info.fandroid.navdrawer.util.GPSTracker;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    FragmentImport fimport;
+    FragmentMap fimport;
     FragmentGallery fgallery;
     FragmentSend fsend;
     FragmentShare fshare;
     FragmentSlideshow fshow;
     FragmentTools ftools;
+    FragmentManager fragmentManager;
+    protected GPSTracker gps;
+    private Double latitude;
+    private Double longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        gps = new GPSTracker(MainActivity.this);
+        setLocation();
+        Bundle bundle = new Bundle();
+        bundle.putDouble("latitude", latitude);
+        bundle.putDouble("longitude", longitude);
+// set Fragmentclass Arguments
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -57,11 +70,29 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         fgallery = new FragmentGallery();
-        fimport = new FragmentImport();
+        fimport = new FragmentMap();
         fsend = new FragmentSend();
         fshare = new FragmentShare();
         fshow = new FragmentSlideshow();
         ftools = new FragmentTools();
+
+
+        fimport.setArguments(bundle);
+    }
+
+    private void setLocation(){
+        if(gps.canGetLocation()){
+            latitude = gps.getLatitude();
+            longitude = gps.getLongitude();
+            Log.i("latitude {}", latitude.toString());
+            Log.i("longitude {}", longitude.toString());
+//            double altitude = gps.getAltitude();
+        }else{
+            // can't get location
+            // GPS or Network is not enabled
+            // Ask user to enable GPS/network in settings
+            gps.showSettingsAlert();
+        }
     }
 
     @Override
@@ -101,8 +132,8 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        FragmentTransaction ftrans = getFragmentManager().beginTransaction();
+        fragmentManager = getFragmentManager();
+        FragmentTransaction ftrans = fragmentManager.beginTransaction();
 
         if (id == R.id.nav_camara) {
             ftrans.replace(R.id.container, fimport);

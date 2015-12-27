@@ -42,10 +42,6 @@ import retrofit.RestAdapter;
  * create an instance of this fragment.
  */
 public class FragmentGallery extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
     GalleryAdapter mAdapter;
 
@@ -91,8 +87,6 @@ public class FragmentGallery extends Fragment {
     public static FragmentGallery newInstance(String param1, String param2) {
         FragmentGallery fragment = new FragmentGallery();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -106,13 +100,6 @@ public class FragmentGallery extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_main);
-
-
-
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
