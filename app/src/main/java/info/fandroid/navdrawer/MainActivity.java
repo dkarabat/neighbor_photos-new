@@ -23,6 +23,7 @@ import info.fandroid.navdrawer.fragments.FragmentShare;
 import info.fandroid.navdrawer.fragments.FragmentSlideshow;
 import info.fandroid.navdrawer.fragments.FragmentTools;
 import info.fandroid.navdrawer.util.GPSTracker;
+import info.fandroid.navdrawer.util.LocationParams;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -35,17 +36,15 @@ public class MainActivity extends AppCompatActivity
     FragmentTools ftools;
     FragmentManager fragmentManager;
     protected GPSTracker gps;
-    private Double latitude;
-    private Double longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         gps = new GPSTracker(MainActivity.this);
         setLocation();
-        Bundle bundle = new Bundle();
-        bundle.putDouble("latitude", latitude);
-        bundle.putDouble("longitude", longitude);
+//        Bundle bundle = new Bundle();
+//        bundle.putDouble("latitude", latitude);
+//        bundle.putDouble("longitude", longitude);
 // set Fragmentclass Arguments
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -77,17 +76,17 @@ public class MainActivity extends AppCompatActivity
         ftools = new FragmentTools();
 
 
-        fimport.setArguments(bundle);
+//        fimport.setArguments(bundle);
     }
 
-    private void setLocation(){
-        if(gps.canGetLocation()){
-            latitude = gps.getLatitude();
-            longitude = gps.getLongitude();
-            Log.i("latitude {}", latitude.toString());
-            Log.i("longitude {}", longitude.toString());
+    private void setLocation() {
+        if (gps.canGetLocation()) {
+            ((LocationParams) getApplication()).setLatitude(gps.getLatitude());
+            ((LocationParams) getApplication()).setLongitude(gps.getLongitude());
+            Log.i("latitude {}", String.valueOf(gps.getLatitude()));
+            Log.i("longitude {}", String.valueOf(gps.getLongitude()));
 //            double altitude = gps.getAltitude();
-        }else{
+        } else {
             // can't get location
             // GPS or Network is not enabled
             // Ask user to enable GPS/network in settings
@@ -152,7 +151,8 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
             ftrans.replace(R.id.container, fsend);
 
-        } ftrans.commit();
+        }
+        ftrans.commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

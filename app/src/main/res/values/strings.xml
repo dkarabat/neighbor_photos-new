@@ -8,7 +8,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="import_item">Import</string>
+    <string name="import_item">Map</string>
     <string name="gallery_item">Gallery</string>
     <string name="slideshow_item">Slideshow</string>
     <string name="tools_item">Tools</string>

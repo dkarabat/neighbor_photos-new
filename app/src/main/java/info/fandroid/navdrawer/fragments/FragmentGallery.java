@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 
 import info.fandroid.navdrawer.DetailActivity;
@@ -28,6 +30,7 @@ import info.fandroid.navdrawer.retrogram.Instagram;
 import info.fandroid.navdrawer.retrogram.model.Media;
 import info.fandroid.navdrawer.retrogram.model.SearchMediaResponse;
 import info.fandroid.navdrawer.util.GPSTracker;
+import info.fandroid.navdrawer.util.LocationParams;
 import info.fandroid.navdrawer.vk.VK;
 import info.fandroid.navdrawer.vk.model.Items;
 import info.fandroid.navdrawer.vk.model.VkResponse;
@@ -65,12 +68,8 @@ public class FragmentGallery extends Fragment {
     // Declaring a Location Manager
     protected LocationManager locationManager;
 
-    protected GPSTracker gps;
-
     private static ProgressBar spinner;
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private RecyclerView recyclerView;
 
     private OnFragmentInteractionListener mListener;
@@ -108,33 +107,9 @@ public class FragmentGallery extends Fragment {
         // Inflate the layout for this fragment
         final View rootView = inflater.inflate(R.layout.fragment_gallery, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.list);
-        gps = new GPSTracker(rootView.getContext());
-
-//        gallery = (Gallery) rootView.findViewById(R.id.gallery);
-//        gallery.setAdapter(new ImageAdapter(getActivity()));
-//        gallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                startImagePagerActivity(position, latitude, longitude);
-//            }
-//        });
-
-        if(gps.canGetLocation()){
-
-            latitude = gps.getLatitude();
-            longitude = gps.getLongitude();
-            Log.i("latitude {}", latitude.toString());
-            Log.i("longitude {}", longitude.toString());
-//            double altitude = gps.getAltitude();
-
-
-        }else{
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
-            gps.showSettingsAlert();
-        }
-
+        latitude = ((LocationParams)getActivity().getApplication()).getLatitude();
+        longitude = ((LocationParams) getActivity().getApplication()).getLongitude();
+        Log.i("COORDINATES : {} }",  String.valueOf(latitude)  + " - "+ String.valueOf(longitude));
         recyclerView.setLayoutManager(new GridLayoutManager(rootView.getContext(), 3));
         recyclerView.setHasFixedSize(true);
 //
@@ -147,8 +122,6 @@ public class FragmentGallery extends Fragment {
 
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
-
-
 
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(),
                 new RecyclerItemClickListener.OnItemClickListener() {
@@ -174,8 +147,6 @@ public class FragmentGallery extends Fragment {
             mListener.onFragmentInteraction(uri);
         }
     }
-
-
 
     @Override
     public void onDetach() {
@@ -260,7 +231,7 @@ public class FragmentGallery extends Fragment {
     private void parseResult(SearchMediaResponse popular) {
         if (popular.getMediaList() != null) {
             for (Media media : popular.getMediaList()) {
-                Log.i("link:", media.getImages().getLowResolution().getUrl());
+//                Log.i("link:", media.getImages().getLowResolution().getUrl());
                 ImageModel model = new ImageModel();
                 model.setUrl(media.getImages().getStandardResolution().getUrl());
                 model.setName(media.getUser().getFullName());
@@ -277,7 +248,7 @@ public class FragmentGallery extends Fragment {
     private  void parseResultVk(VkResponse popular) {
         if (popular.getResponse().getItems() != null) {
             for (Items media : popular.getResponse().getItems()) {
-                Log.i("link:", media.getPhoto_130());
+//                Log.i("link:", media.getPhoto_130());
                 ImageModel model = new ImageModel();
                 model.setUrl(media.getPhoto_604());
                 model.setName("vk.com/id" + media.getOwner_id());

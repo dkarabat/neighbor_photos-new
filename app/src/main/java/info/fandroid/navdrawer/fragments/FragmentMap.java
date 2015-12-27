@@ -3,36 +3,41 @@ package info.fandroid.navdrawer.fragments;
 import android.Manifest;
 import android.app.Fragment;
 import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import info.fandroid.navdrawer.MainActivity;
 import info.fandroid.navdrawer.R;
+import info.fandroid.navdrawer.util.LocationParams;
 
 
-public class FragmentMap extends Fragment {
+public class FragmentMap extends Fragment implements GoogleMap.OnMapLongClickListener, GoogleMap.OnMapClickListener, GoogleMap.OnMarkerDragListener {
     MapView mapView;
     GoogleMap map;
+    private Double latitude;
+    private Double longitude;
+    private Circle circle;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_import, container, false);
-         Double latitude = getArguments().getDouble("latitude");
-         Double longitude = getArguments().getDouble("longitude");
+        View v = inflater.inflate(R.layout.fragment_map, container, false);
+        latitude = ((LocationParams)getActivity().getApplication()).getLatitude();
+        longitude = ((LocationParams)getActivity().getApplication()).getLongitude();
 
         // Gets the MapView from the XML layout and creates it
         mapView = (MapView) v.findViewById(R.id.mapview);
@@ -40,7 +45,7 @@ public class FragmentMap extends Fragment {
 
         // Gets to GoogleMap from the MapView and does initialization stuff
         map = mapView.getMap();
-        map.getUiSettings().setMyLocationButtonEnabled(true);
+
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -52,7 +57,17 @@ public class FragmentMap extends Fragment {
 //            return TODO;
         }
         map.setMyLocationEnabled(true);
-        map.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title("My Home").snippet("Home Address"));
+        map.addMarker(new MarkerOptions()
+                .position(new LatLng(latitude, longitude))
+                .title("Your location")
+                .draggable(true)
+                .snippet("Home Address"));
+        map.getUiSettings().setCompassEnabled(true);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.setOnMarkerDragListener(this);
+        map.setOnMapLongClickListener(this);
+        map.setOnMapClickListener(this);
+        setRadius(latitude, longitude);
 
         // Needs to call MapsInitializer before doing any CameraUpdateFactory calls
         MapsInitializer.initialize(this.getActivity());
@@ -62,6 +77,23 @@ public class FragmentMap extends Fragment {
         map.animateCamera(cameraUpdate);
 
         return v;
+    }
+
+    private Circle setRadius(Double lat, Double lng) {
+        CircleOptions circleOptions = new CircleOptions()
+                .center(new LatLng(lat, lng))
+                .radius(500)
+                .strokeWidth(2)
+                .strokeColor(Color.BLUE)
+                .fillColor(Color.parseColor("#500084d3"));
+        // Supported formats are: #RRGGBB #AARRGGBB
+        //   #AA is the alpha, or amount of transparency
+        circle = map.addCircle(circleOptions);
+        return circle;
+    }
+
+    private void removeRadius(Circle circle){
+        circle.remove();
     }
 
     @Override
@@ -80,5 +112,44 @@ public class FragmentMap extends Fragment {
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        // TODO Auto-generated method stub
+        map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+    }
+
+    @Override
+    public void onMapLongClick(LatLng latLng) {
+        // TODO Auto-generated method stub
+
+        //create new marker when user long clicks
+//        map.addMarker(new MarkerOptions()
+//                .position(latLng)
+//                .draggable(true));
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+        // TODO Auto-generated method stub
+        LatLng dragPosition = marker.getPosition();
+        latitude = dragPosition.latitude;
+        longitude = dragPosition.longitude;
+        ((LocationParams) getActivity().getApplication()).setLatitude(latitude);
+        ((LocationParams) getActivity().getApplication()).setLongitude(longitude);
+        Log.i("info", "on drag end :" + latitude + " dragLong :" + longitude);
+        circle.remove();
+        circle = setRadius(latitude, longitude);
     }
 }
