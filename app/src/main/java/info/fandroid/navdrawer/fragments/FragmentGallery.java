@@ -107,6 +107,7 @@ public class FragmentGallery extends Fragment {
         // Inflate the layout for this fragment
         final View rootView = inflater.inflate(R.layout.fragment_gallery, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.list);
+
         latitude = ((LocationParams)getActivity().getApplication()).getLatitude();
         longitude = ((LocationParams) getActivity().getApplication()).getLongitude();
         Log.i("COORDINATES : {} }",  String.valueOf(latitude)  + " - "+ String.valueOf(longitude));
@@ -115,9 +116,9 @@ public class FragmentGallery extends Fragment {
 //
 //
         mAdapter = new GalleryAdapter(rootView.getContext(), data);
+        mAdapter.clearData();
         recyclerView.setAdapter(mAdapter);
         spinner = (ProgressBar) rootView.findViewById(R.id.loading);
-
         new AsyncHttpTask().execute();
 
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
