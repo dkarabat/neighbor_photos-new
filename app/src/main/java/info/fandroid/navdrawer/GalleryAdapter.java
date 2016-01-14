@@ -26,17 +26,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.data = data;
     }
 
-    public void clearData() {
-        int size = this.data.size();
-        if (size > 0) {
-            for (int i = 0; i < size; i++) {
-                data.remove(0);
-            }
-
-            this.notifyItemRangeRemoved(0, size);
-        }
-    }
-
     public void addApplications(List<ImageModel> images) {
         this.data.addAll(images);
         this.notifyItemRangeInserted(0, images.size() - 1);

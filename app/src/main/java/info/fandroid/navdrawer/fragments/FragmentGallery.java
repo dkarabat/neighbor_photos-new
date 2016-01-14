@@ -102,6 +102,7 @@ public class FragmentGallery extends Fragment {
 //        setContentView(R.layout.activity_main);
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -109,17 +110,29 @@ public class FragmentGallery extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_gallery, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.list);
 
-        latitude = ((LocationParams)getActivity().getApplication()).getLatitude();
+        latitude = ((LocationParams) getActivity().getApplication()).getLatitude();
         longitude = ((LocationParams) getActivity().getApplication()).getLongitude();
-        Log.i("COORDINATES : {} }",  String.valueOf(latitude)  + " - "+ String.valueOf(longitude));
+        Log.i("COORDINATES : {} }", String.valueOf(latitude) + " - " + String.valueOf(longitude));
         recyclerView.setLayoutManager(new GridLayoutManager(rootView.getContext(), 3));
         recyclerView.setHasFixedSize(true);
 //
 //
         mAdapter = new GalleryAdapter(rootView.getContext(), data);
-        mAdapter.clearData();
+
         recyclerView.setAdapter(mAdapter);
         spinner = (ProgressBar) rootView.findViewById(R.id.loading);
+
+        int size = this.data.size();
+        if (size > 0) {
+            for (int i = 0; i < size; i++) {
+                data.remove(0);
+                recyclerView.removeViewAt(i);
+                mAdapter.notifyItemRemoved(i);
+                mAdapter.notifyItemRangeChanged(i, this.data.size());
+                mAdapter.notifyItemRangeRemoved(0, size);
+            }
+        }
+        mAdapter.notifyDataSetChanged();
         new AsyncHttpTask().execute();
 
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -134,6 +147,16 @@ public class FragmentGallery extends Fragment {
                 }));
         return rootView;
     }
+
+//    private void clearData() {
+//        int size = this.data.size();
+//        if (size > 0) {
+//            for (int i = 0; i < size; i++) {
+//                data.remove(0);
+//            }
+//            this.notifyItemRangeRemoved(0, size);
+//        }
+//    }
 
     private void startImagePagerActivity(int position) {
         Intent intent = new Intent(getActivity(), DetailActivity.class);
@@ -175,7 +198,7 @@ public class FragmentGallery extends Fragment {
     //Downloading data asynchronously
     public class AsyncHttpTask extends AsyncTask<String, Void, Integer> {
 
-        protected void onPreExecute (){
+        protected void onPreExecute() {
             spinner.setVisibility(View.VISIBLE);
         }
 
@@ -196,7 +219,7 @@ public class FragmentGallery extends Fragment {
                 parseResult(response);
                 result = 1; // Successful
             } catch (Exception e) {
-                String msg = (e.getMessage()==null)?"Login failed!":e.getMessage();
+                String msg = (e.getMessage() == null) ? "Login failed!" : e.getMessage();
                 Log.i("error", msg);
                 result = 0; //"Failed
             }
@@ -219,10 +242,10 @@ public class FragmentGallery extends Fragment {
                 }
                 mAdapter.setImageData(data);
             } else {
-				Toast.makeText(getActivity(), "Failed1 to fetch data!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Failed1 to fetch data!", Toast.LENGTH_SHORT).show();
             }
             //Hide progressbar
-		spinner.setVisibility(View.GONE);
+            spinner.setVisibility(View.GONE);
         }
     }
 
@@ -248,7 +271,7 @@ public class FragmentGallery extends Fragment {
      *
      * @param popular
      */
-    private  void parseResultVk(VkResponse popular) {
+    private void parseResultVk(VkResponse popular) {
         if (popular.getResponse().getItems() != null) {
             for (Items media : popular.getResponse().getItems()) {
 //                Log.i("link:", media.getPhoto_130());
